@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using System.Text;
 using System;
 using System.Collections.Generic;
@@ -68,8 +69,8 @@ namespace API
             app.UseHttpsRedirection();
 
             app.UseRouting();  
-
-            //cors
+                                                                                                                                    //Warning when adustiong cors
+            app.UseCors(policy => policy.AllowAnyMethod().AllowAnyHeader().WithOrigins("http://localhost:4200/"));
 
             app.UseAuthentication();
             app.UseAuthorization();
