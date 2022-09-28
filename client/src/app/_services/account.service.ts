@@ -8,7 +8,7 @@ import { map } from 'rxjs/operators'
   providedIn: 'root'
 })
 export class AccountService {
-  baseApiUrl:"https://localhost:5001/api/account/";
+  baseApiUrl = "https://localhost:5001/api/account/";
   private currentUserSource = new ReplaySubject<User>(1);
   currentUser$ = this.currentUserSource.asObservable();
 
@@ -25,6 +25,7 @@ export class AccountService {
   login(model:any){
     return this.http.post(this.baseApiUrl + "login", model).pipe(
       map((user: User) => {
+        console.log(user);
         this.setNextUser(user);
       })
     )

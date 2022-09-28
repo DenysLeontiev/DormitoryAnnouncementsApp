@@ -1,0 +1,3 @@
+<ng-container *ngIf="!(accountService.currentUser$ | async)">
+  <app-register></app-register>
+</ng-container>
