@@ -6,6 +6,7 @@ using API.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API.Interfaces;
+using AutoMapper;
 
 namespace API.Controllers
 {
@@ -13,10 +14,12 @@ namespace API.Controllers
     {
         private readonly DataContext _context;
         private readonly ITokenService _tokenService;
-        public AccountController(DataContext context, ITokenService tokenService)
+        private readonly IMapper _mapper;
+        public AccountController(DataContext context, ITokenService tokenService, IMapper mapper)
         {
             _context = context;
             _tokenService = tokenService;
+            _mapper = mapper;
         }
 
         [HttpPost("register")]
@@ -38,18 +41,15 @@ namespace API.Controllers
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            return new UserDto
-            {
-                Username = user.UserName,
-                Token = _tokenService.CreateToken(user),
-                Email = user.Email, 
-            };
+            var userToReturn = _mapper.Map<UserDto>(user);
+            userToReturn.Token = _tokenService.CreateToken(user);
+            return userToReturn;
         }
 
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
-            var user = await _context.Users
+            AppUser user = await _context.Users
                 .Include(user => user.Announcements)
                 .ThenInclude(announcement => announcement.Photos)
                 .FirstOrDefaultAsync(predicate: x => x.UserName == loginDto.Username && x.Email == loginDto.Email);
@@ -64,11 +64,19 @@ namespace API.Controllers
                 if(user.PasswordHash[i] != computedHash[i]) return Unauthorized("Wrong password");
             }
 
+            var userToReturn = _mapper.Map<UserDto>(user);
+            userToReturn.Token = _tokenService.CreateToken(user);
+            // return userToReturn;
+
             return new UserDto
             {
                 Username = user.UserName,
+                Id = user.Id,
                 Token = _tokenService.CreateToken(user),
                 Email = user.Email,
+                DormitotyNumber = user.DormitotyNumber,
+                DormitotyRoom = user.DormitotyRoom,
+                Announcements = _mapper.Map<ICollection<AnnouncementDto>>(user.Announcements)
             };
         }
     }

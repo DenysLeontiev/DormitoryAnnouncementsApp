@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Net.Mime;
 using System.Text;
 using System;
@@ -19,6 +20,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using API.Helpers;
 
 namespace API
 {
@@ -42,7 +44,6 @@ namespace API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebAPIv5", Version = "v1" });
             });
-
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options => 
                     {
@@ -54,6 +55,8 @@ namespace API
                             ValidateAudience = false
                         };
                     });
+            services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -69,8 +72,8 @@ namespace API
             app.UseHttpsRedirection();
 
             app.UseRouting();  
-                                                                                                                                    //Warning when adustiong cors
-            app.UseCors(policy => policy.AllowAnyMethod().AllowAnyHeader().WithOrigins("http://localhost:4200/"));
+                                                                                                                                    //Warning when adustiong cors   
+            app.UseCors(configurePolicy: policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200"));
 
             app.UseAuthentication();
             app.UseAuthorization();
